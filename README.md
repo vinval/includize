@@ -7,4 +7,6 @@ Include html code everywhere inside the html root like code below:
 
 With data attribute you can pass json data to included file.
 
+The integrated listener can also use include tag in real time changes.
+
 That's it.
