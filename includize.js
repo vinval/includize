@@ -13,7 +13,7 @@
             var parser=new DOMParser();
             
             var replaceCurlyBraces = function(t, data) {
-                var regExp = new RegExp(/{{(.*?)}}/, "g");
+                var regExp = /{{(.*?)}}/g;
                 var matches = [];
                 var array = [];
                 try {
@@ -21,11 +21,12 @@
                 } catch (e) {
                     console.log(e);
                 }
-                var array = [];
-                matches.forEach(function(match){
-                    var value = match.replace("{{","").replace("}}",""); 
-                    t = t.replace(match, data[value]);
-                })
+                if (matches) {
+                    matches.forEach(function(match){
+                        var value = match.replace("{{","").replace("}}",""); 
+                        t = t.replace(match, data[value]);
+                    })
+                }
                 return t;
             };
 
@@ -48,21 +49,18 @@
                 var url = include.getAttribute("src");
                 var data = JSON.parse(include.getAttribute("data")); // definire i dati da trasferire nel nuovo elemento
                 var qr = new XMLHttpRequest();
+                
                 qr.open('get',url);
                 qr.send();
                 qr.onreadystatechange = function(){
                     if (qr.readyState === 4) {
-                        var html = parser.parseFromString(replaceCurlyBraces(this.responseText, data), "text/html");
-                        var nodes = [].slice.call(html.body.childNodes);
-                        var n = nodes.length-1;
-                        for (; n>=0; n--) {
-                            var node = document.createElement("node");//include.cloneNode(true);
-                            var id = "node_tmp_"+id_include+"_"+n;
+                        var html = replaceCurlyBraces(this.responseText, data);
+                        var node = document.createElement("node");
+                        var id = "node_tmp_"+id_include;
                             node.setAttribute("id", id);
-                            if (include.parentNode) {
-                                include.parentNode.insertBefore(node, include.parentNode.childNodes[getChildIndex(include)]);
-                                include.parentNode.replaceChild(html.body.childNodes[n],document.getElementById(id));
-                            }
+                        if (include.parentNode) {
+                            include.parentNode.insertBefore(node, include.parentNode.childNodes[getChildIndex(include)]);
+                            document.getElementById(id).outerHTML = html;
                         }
                         if (include.parentNode) include.parentNode.removeChild(include);
                         id_include++;
